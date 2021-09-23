@@ -85,3 +85,7 @@ normal `NavigationView`.
      )
  }
 ```
+
+### Example
+
+![Example usage of StylableScrollView](.readme/screenshot.png)
