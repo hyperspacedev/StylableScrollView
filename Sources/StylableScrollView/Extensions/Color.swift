@@ -18,7 +18,7 @@
 import Foundation
 import SwiftUI
 
-extension Color {
+public extension Color {
 
     /// `Color.systemGray6` multi-platform equivalent.
     ///
