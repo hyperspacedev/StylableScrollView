@@ -217,7 +217,9 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
             })
                 .frame(height: headerHeight)
                 .zIndex(1)
+                #if os(iOS)
                 .navigationBarHidden(true)
+                #endif
         }
 
         /// Returns the opacity of the material view that is used as the background of the fake navigation bar.
