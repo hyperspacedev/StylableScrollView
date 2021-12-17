@@ -143,6 +143,14 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
                     }
                 }
             }
+            .foregroundColor(
+                navBarElementColor(
+                    for: materialOpacity(
+                        for: self.minY
+                    ),
+                       self.colorScheme
+                )
+            )
 
         }
 
