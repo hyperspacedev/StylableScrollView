@@ -18,6 +18,9 @@
 import Foundation
 import SwiftUI
 
+// MARK: – SWIFTLINT
+//  swiftlint:disable nesting
+
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct Preferences {
 
@@ -26,11 +29,11 @@ public struct Preferences {
 
         /// Allows us to read the minY of the header from ancestor views.
         public struct Key: PreferenceKey {
-            
+
             public typealias Value = Data
 
             public static var defaultValue: Data = Data.init(minY: 0)
-           
+
             public static func reduce(value: inout Data, nextValue: () -> Data) {
                 value = nextValue()
             }
@@ -74,7 +77,7 @@ public struct Preferences {
                 public typealias Value = [Data]
 
                 public static var defaultValue: [Data] = []
-                
+
                 public static func reduce(value: inout [Data], nextValue: () -> [Data]) {
                     value.append(contentsOf: nextValue())
                 }
