@@ -29,7 +29,7 @@ import SwiftUI
 public protocol ScrollViewStyle {
 
     /// A view that represents the body of a ScrollView.
-    associatedtype Body : View
+    associatedtype Body: View
 
     /// Creates a view that represents the body of a ScrollView.
     ///

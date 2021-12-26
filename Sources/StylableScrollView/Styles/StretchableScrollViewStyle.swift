@@ -23,41 +23,86 @@ import SwiftUI
 @available(iOS 15.0, macOS 12.0, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
-public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyle where Header: View, Title: View, Content: View {
+//  swiftlint:disable:next line_length
+public struct StretchableScrollViewStyle<Header, Title, Content, TE, LE>: ScrollViewStyle where Header: View, Title: View, Content: View, TE: View, LE: View {
 
     private let header: Header
     private let title: Title
     private let navBarContent: Content
+    private let trailingElements: (NavigationBarProxy) -> TE
+    private let leadingElements: (NavigationBarProxy) -> LE
 
     public let showBackButton: Bool
 
     private var headerHeight: CGFloat
 
-    public init(size headerHeight: CGFloat = 200, header: () -> Header, title: () -> Title, navBarContent: () -> Content, _ showBackButton: Bool = true) {
+    public init(
+        size headerHeight: CGFloat = 200,
+        header: () -> Header,
+        title: () -> Title,
+        navBarContent: () -> Content,
+        _ showBackButton: Bool = true,
+        trailingElements: @escaping (NavigationBarProxy) -> TE,
+        leadingElements: @escaping (NavigationBarProxy) -> LE
+    ) {
 
         self.headerHeight = headerHeight
         self.header = header()
         self.title = title()
         self.navBarContent = navBarContent()
         self.showBackButton = showBackButton
+        self.trailingElements = trailingElements
+        self.leadingElements = leadingElements
 
     }
 
-    private struct view: View {
+    private class Manager: ObservableObject {
 
-        typealias navBarPreferenceKey = Preferences.NavigationBar.Elements.Key
-        typealias navBarPreferenceData = Preferences.NavigationBar.Elements.Data
+        @Environment(\.colorScheme) var colorScheme
 
-        @State var minY: CGFloat = 0
+        @Published var minY: CGFloat = 0 {
+            didSet {
+                self.materialOpacity = Double(-minY > 80 ? -(minY + 80) / 30 : 0)
+            }
+        }
+        @Published var navigationBarProxy: NavigationBarProxy = NavigationBarProxy(
+            mode: .large,
+            elementsColor: Color.white
+        )
+
+        /// The opacity of the material view that is used as the background of the fake navigation bar.
+        @Published var materialOpacity: CGFloat = 0 {
+            didSet {
+                self.navigationBarProxy.mode = materialOpacity < 0.3 ? .large : .inline
+
+                if self.colorScheme == .light {
+
+                    self.navigationBarProxy.elementsColor = self.navigationBarProxy.mode == .large ?
+                            Color.backgroundColor : Color.backgroundColorInverted(for: self.colorScheme)
+
+                }
+
+            }
+        }
+
+    }
+
+    private struct BodyView: View {
+
+        @ObservedObject var manager: Manager = Manager()
+
         @State var leadingNavBarElements: [AnyView] = []
         @State var trailingNavBarElements: [AnyView] = []
+
+        let trailingElements: (NavigationBarProxy) -> TE
+        let leadingElements: (NavigationBarProxy) -> LE
 
         @Environment(\.colorScheme) var colorScheme
         @Environment(\.layoutDirection)
         var layoutDirection: LayoutDirection
 
         var configuration: ScrollViewStyleConfiguration
-        
+
         let header: Header
         let title: Title
         let navBarContent: Content
@@ -75,22 +120,7 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
                         configuration.content
                     }
                     .onPreferenceChange(Preferences.Header.Key.self) { preference in
-                        self.minY = preference.minY
-                    }
-                    .onPreferenceChange(navBarPreferenceKey.self) { preferences in
-
-                        for p in preferences {
-
-                            if p.axis == .leading {
-                                self.leadingNavBarElements.append(p.element)
-                            }
-
-                            if p.axis == .trailing {
-                                self.trailingNavBarElements.append(p.element)
-                            }
-
-                        }
-
+                        self.manager.minY = preference.minY
                     }
                 }
             )
@@ -99,67 +129,26 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
 
                         if self.showBackButton {
                             BackButton(
-                                color: navBarElementColor(
-                                    for: materialOpacity(
-                                        for: self.minY
-                                    ),
-                                       self.colorScheme
-                                )
+                                color: self.manager.navigationBarProxy.elementsColor
                             )
                                 .shadow(radius: 10)
                         }
 
-                        getNavBarElements(for: self.layoutDirection == .leftToRight ? .leading : .trailing)
+                        self.leadingElements(
+                            self.manager.navigationBarProxy
+                        )
 
                         Spacer()
 
-                        getNavBarElements(for: self.layoutDirection == .leftToRight ? .trailing : .leading)
+                        self.trailingElements(
+                            self.manager.navigationBarProxy
+                        )
 
                     }
                         .padding(.top, 5)
                         .padding(.trailing),
                     alignment: .top
                 )
-        }
-
-        @ViewBuilder private func getNavBarElements(for horizontalEdge: HorizontalEdge) -> some View {
-            
-            HStack {
-                if horizontalEdge == .leading {
-                    if self.leadingNavBarElements.count > 0 {
-                        ForEach(
-                            0 ..< self.leadingNavBarElements.count
-                        ) { index in
-                            self.leadingNavBarElements[index]
-                        }
-                    }
-                } else {
-                    if self.trailingNavBarElements.count > 0 {
-                        ForEach(
-                            0 ..< self.trailingNavBarElements.count
-                        ) { index in
-                            self.trailingNavBarElements[index]
-                        }
-                    }
-                }
-            }
-            .foregroundColor(
-                navBarElementColor(
-                    for: materialOpacity(
-                        for: self.minY
-                    ),
-                       self.colorScheme
-                )
-            )
-
-        }
-
-        private func navBarElementColor(for materialOpacity: Double, _ scheme: ColorScheme) -> Color {
-            if scheme == .light {
-                return materialOpacity < 0.3 ? Color.backgroundColor : Color.backgroundColorInverted(for: self.colorScheme)
-            } else {
-                return Color.white
-            }
         }
 
         public var headerView: some View {
@@ -189,8 +178,7 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
                                 .background(.ultraThickMaterial)
                                 .overlay(
                                     Divider()
-                                        .foregroundColor(.gray)
-                                    , alignment: .bottom
+                                        .foregroundColor(.gray), alignment: .bottom
                                 )
                         }
                             .opacity(materialOpacity(for: minY))
@@ -212,7 +200,7 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
                                 .offset(y: minY > 0 ? -minY : 0)
                                 .zIndex(0.8)
                                 .opacity(materialOpacity(for: minY) > 0.3 ? 0 : 1)
-                                .animation(.easeIn(duration: 0.2)),
+                                .animation(.easeIn(duration: 0.2), value: materialOpacity(for: minY)),
                             alignment: .bottomLeading
                         )
                         .preference(
@@ -247,7 +235,7 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
         private func getHeightForHeader(for minY: CGFloat, _ isOptional: Bool = true) -> CGFloat? {
             return minY > 0 ? headerHeight + minY : isOptional ? nil : headerHeight
         }
-        
+
     }
 
     /// Creates a view that represents a body that is scrollable in the direction of the given
@@ -264,7 +252,9 @@ public struct StretchableScrollViewStyle<Header, Title, Content>: ScrollViewStyl
             NSLog("Configuration.axes was passed as %d, but .vertical will be used instead.", configuration.axes.rawValue)
         }
 
-        return StretchableScrollViewStyle.view(
+        return StretchableScrollViewStyle.BodyView(
+            trailingElements: self.trailingElements,
+            leadingElements: self.leadingElements,
             configuration: configuration,
             header: self.header,
             title: self.title,

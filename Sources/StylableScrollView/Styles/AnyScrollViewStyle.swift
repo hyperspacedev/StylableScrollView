@@ -21,11 +21,11 @@ import SwiftUI
 /// A type-erased ``ScrollViewStyle``.
 public struct AnyScrollViewStyle: ScrollViewStyle {
     private let styleMakeBody: (ScrollViewStyle.Configuration) -> AnyView
-    
+
     public init<S: ScrollViewStyle>(_ style: S) {
         self.styleMakeBody = style.makeTypeErasedBody
     }
-    
+
     public func makeBody(configuration: ScrollViewStyle.Configuration) -> AnyView {
         self.styleMakeBody(configuration)
     }
