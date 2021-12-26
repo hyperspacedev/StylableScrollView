@@ -70,14 +70,18 @@ import SwiftUI
 ///         )
 ///     }
 ///
-/// ![A stretchable scroll view with a big text talking about French footballer Kylian Mbappé. On top, a stretchable header can be seen.](StretchableHeader-kmbappe.png)
+/// ![A stretchable scroll view with a big text talking about
+/// French footballer Kylian Mbappé. On top, a stretchable header can be seen.](StretchableHeader-kmbappe.png)
 ///
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct StylableScrollView<Content>: View {
 
+    /// The actual version of StylableScrollView that is being used.
+    public let version: String = "\(Constants.MAJOR).\(Constants.MINOR).\(Constants.PATCH)"
+
     /// The style that is being used.
     @Environment(\.scrollViewStyle) private var style
-    
+
     /// The configuration for the ScrollView
     private var configuration: ScrollViewStyleConfiguration
 
@@ -93,7 +97,7 @@ public struct StylableScrollView<Content>: View {
 
 }
 
-public extension StylableScrollView where Content : View {
+public extension StylableScrollView where Content: View {
 
     /// Creates an instance of an ``StylableScrollView`` that is scrollable in a specific
     /// axis, and can show indicators while scrolling, using the body that you define.
@@ -104,7 +108,11 @@ public extension StylableScrollView where Content : View {
     ///      component of the content offset, in a way that's suitable for the platform.
     ///    - content: The scroll view's content.
     ///
-    init(_ axes: Axis.Set = .vertical, showIndicators: Bool = true, content: () -> Content) {
+    init(
+        _ axes: Axis.Set = .vertical,
+        showIndicators: Bool = true,
+        content: () -> Content
+    ) {
 
         self.init(
             ScrollViewStyleConfiguration(

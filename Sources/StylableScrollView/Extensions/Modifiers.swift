@@ -18,7 +18,7 @@
 import Foundation
 import SwiftUI
 
-//  MARK: - SCROLLVIEW STYLE
+// MARK: - SCROLLVIEW STYLE
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public extension View {
 
@@ -53,9 +53,10 @@ public extension View {
     ///         )
     ///     }
     ///
-    /// ![A stretchable scroll view with a big text talking about French footballer Kylian Mbappé. On top, a stretchable header can be seen.](StretchableHeader-kmbappe.png)
+    /// ![A stretchable scroll view with a big text talking about French footballer
+    /// Kylian Mbappé. On top, a stretchable header can be seen.](StretchableHeader-kmbappe.png)
     ///
-    @inlinable @ViewBuilder func scrollViewStyle<S>(_ style: S) -> some View where S : ScrollViewStyle {
+    @inlinable @ViewBuilder func scrollViewStyle<S>(_ style: S) -> some View where S: ScrollViewStyle {
 
         self.environment(\.scrollViewStyle, AnyScrollViewStyle(style))
 
@@ -63,7 +64,7 @@ public extension View {
 
 }
 
-//  MARK: - STRETCHABLE HEADER
+// MARK: - STRETCHABLE HEADER
 @available(iOS 15.0, macOS 12, *)
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
@@ -84,19 +85,24 @@ public extension ScrollView {
     ///   - header: The header image that will be used for the sticky header.
     ///   - title: The title that appears on top of the header.
     ///   - navBar: The contents of the navigationBar that appears when scrolling.
+    ///   - leadingElements: The navigation bar elements that will appear on the leading side.
+    ///   - trailingElements: The navigation bar elements that will appear on the trailing side.
     ///
-    @ViewBuilder @inlinable func stretchableHeader<Title, NavBar>(
+    @ViewBuilder @inlinable func stretchableHeader<Title, NavBar, TrailingElements, LeadingElements>(
         header: Image,
         title: () -> Title,
-        navBar: () -> NavBar
-    ) -> some View where Title: View, NavBar: View {
+        navBar: () -> NavBar,
+        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements,
+        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements
+    ) -> some View where Title: View, NavBar: View, LeadingElements: View, TrailingElements: View {
 
         StylableScrollView(
             .vertical,
             showIndicators: false,
             content: {
                 self
-            })
+            }
+        )
             .scrollViewStyle(
                 StretchableScrollViewStyle(
                     header: {
@@ -105,7 +111,12 @@ public extension ScrollView {
                             .aspectRatio(contentMode: .fill)
                     },
                     title: title,
-                    navBarContent: navBar
+                    navBarContent: navBar,
+                    leadingElements: {
+                        leadingElements($0)
+                    }, trailingElements: {
+                        trailingElements($0)
+                    }
                 )
             )
 
@@ -126,24 +137,34 @@ public extension ScrollView {
     ///   - header: The view that will be used for the sticky header.
     ///   - title: The title that appears on top of the header.
     ///   - navBar: The contents of the navigationBar that appears when scrolling.
+    ///   - leadingElements: The navigation bar elements that will appear on the leading side.
+    ///   - trailingElements: The navigation bar elements that will appear on the trailing side.
     ///
-    @ViewBuilder @inlinable func stretchableHeader<Header, Title, NavBar>(
+    @ViewBuilder @inlinable func stretchableHeader<Header, Title, NavBar, TrailingElements, LeadingElements>(
         header: () -> Header,
         title: () -> Title,
-        navBar: () -> NavBar
-    ) -> some View where Header: View, Title: View, NavBar: View {
+        navBar: () -> NavBar,
+        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements,
+        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements
+    ) -> some View where Header: View, Title: View, NavBar: View, LeadingElements: View, TrailingElements: View {
 
         StylableScrollView(
             .vertical,
             showIndicators: false,
             content: {
                 self
-            })
+            }
+        )
             .scrollViewStyle(
                 StretchableScrollViewStyle(
                     header: header,
                     title: title,
-                    navBarContent: navBar
+                    navBarContent: navBar,
+                    leadingElements: {
+                        leadingElements($0)
+                    }, trailingElements: {
+                        trailingElements($0)
+                    }
                 )
             )
 
@@ -151,7 +172,7 @@ public extension ScrollView {
 
 }
 
-//  MARK: - SIZE MODIFIERS
+// MARK: - SIZE MODIFIERS
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public extension View {
 
@@ -175,7 +196,7 @@ public extension View {
 
 }
 
-//  MARK: - NAVIGATION BAR ELEMENTS
+// MARK: - NAVIGATION BAR ELEMENTS
 extension View {
 
     /// Creates a fake navigation bar item for ``StretchableScrollViewStyle``'s fake navigation bar using
@@ -184,7 +205,8 @@ extension View {
     ///    - Parameters:
     ///        - axis: The horizontal edge the element will appear at.
     ///        - content: The element view
-    ///        - affectedByColorChanges: Whether the element is affected by the changes in color when shown in a navigation Bar. Defaults to `true`.
+    ///        - affectedByColorChanges: Whether the element is affected by
+    ///        the changes in color when shown in a navigation Bar. Defaults to `true`.
     ///
     /// Use this modifier to set a specific navigation bar element for
     /// ``StretchableScrollViewStyle`` instances within a view:
@@ -202,9 +224,22 @@ extension View {
     @available(iOS 15.0, macOS 12.0, *)
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
-    @ViewBuilder public func navigationBarElement<Content: View>(axis: HorizontalEdge, _ content: () -> Content) -> some View {
+    @available(*, deprecated, message: "Please pass your elements as arguments to the ScrollViewStyle.")
+    public func navigationBarElement<Content: View>(axis: HorizontalEdge, _ content: () -> Content) -> some View {
 
-        self.preference(
+        guard Constants.MAJOR < 1 else {
+            fatalError(".navigationBarElement(axis:,_:) is obsolete and is not working anymore.")
+        }
+
+        /*
+         *  This function passes the navigation bar elements as preference items to the scroll view style,
+         *  but they do not update, even if a state variable is changed.
+         *
+         *  For this reason, this function is deprecated and should be deleted before the stable release,
+         *  unless we find a way to make it work as desired.
+         */
+        #warning("TODO: We should remove this function before the stable release (X.y.z | X > 0).")
+        return self.preference(
             key: Preferences.NavigationBar.Elements.Key.self,
             value: [
                 Preferences.NavigationBar.Elements.Data(
@@ -215,4 +250,5 @@ extension View {
         )
 
     }
+
 }

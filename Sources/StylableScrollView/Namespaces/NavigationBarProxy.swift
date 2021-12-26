@@ -10,29 +10,29 @@
 *   CONDITIONS OF THIS LICENSE AND FOR AGREEING TO BE BOUND BY THE TERMS
 *   AND CONDITIONS OF THIS LICENSE.
 *
-*   AnyScrollViewStyle.swift
+*   StylableScrollView.swift
 *
-*   Created by Alex Modroño Vara on 5/8/21.
+*   Created by Alex Modroño Vara on 26/12/21.
 *
 */
 import Foundation
 import SwiftUI
 
-/// A type-erased ``ScrollViewStyle``.
-public struct AnyScrollViewStyle: ScrollViewStyle {
-    private let styleMakeBody: (ScrollViewStyle.Configuration) -> AnyView
+// MARK: - NAVIGATION BAR
+//
+/// A proxy for access to several aspects of a Navigation Bar Element,
+/// such as whether the navigation bar has changed display mode, the
+/// preferred color for navigation bar elements, and more.
+@available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
+public struct NavigationBarProxy {
 
-    public init<S: ScrollViewStyle>(_ style: S) {
-        self.styleMakeBody = style.makeTypeErasedBody
+    public enum Mode {
+        case large
+        case inline
     }
 
-    public func makeBody(configuration: ScrollViewStyle.Configuration) -> AnyView {
-        self.styleMakeBody(configuration)
-    }
-}
+    public var mode: Mode
 
-fileprivate extension ScrollViewStyle {
-    func makeTypeErasedBody(configuration: ScrollViewStyle.Configuration) -> AnyView {
-        AnyView(makeBody(configuration: configuration))
-    }
+    public var elementsColor: Color
+
 }

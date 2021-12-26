@@ -28,6 +28,14 @@ public extension Color {
         return scheme == .light ? Color(red: 0.95, green: 0.95, blue: 0.97) : Color(red: 0.11, green: 0.11, blue: 0.12)
     }
 
+    /// `Color.systemGray6` multi-platform equivalent.
+    ///
+    /// - Parameters:
+    ///    - scheme: The current color scheme.
+    static func label(for scheme: ColorScheme) -> Color {
+        return scheme == .light ? Color.black : Color.white
+    }
+
     /// A multi-platform solution for obtaining the window's background color.
     static var backgroundColor: Color {
 
