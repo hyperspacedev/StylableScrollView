@@ -225,7 +225,11 @@ extension View {
     @available(tvOS, unavailable)
     @available(watchOS, unavailable)
     @available(*, deprecated, message: "Please pass your elements as arguments to the ScrollViewStyle.")
-    @ViewBuilder public func navigationBarElement<Content: View>(axis: HorizontalEdge, _ content: () -> Content) -> some View {
+    public func navigationBarElement<Content: View>(axis: HorizontalEdge, _ content: () -> Content) -> some View {
+
+        guard Constants.MAJOR < 1 else {
+            fatalError(".navigationBarElement(axis:,_:) is obsolete and is not working anymore.")
+        }
 
         /*
          *  This function passes the navigation bar elements as preference items to the scroll view style,
@@ -235,7 +239,7 @@ extension View {
          *  unless we find a way to make it work as desired.
          */
         #warning("TODO: We should remove this function before the stable release (X.y.z | X > 0).")
-        self.preference(
+        return self.preference(
             key: Preferences.NavigationBar.Elements.Key.self,
             value: [
                 Preferences.NavigationBar.Elements.Data(

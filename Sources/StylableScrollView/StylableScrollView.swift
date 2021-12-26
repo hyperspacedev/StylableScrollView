@@ -76,6 +76,9 @@ import SwiftUI
 @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
 public struct StylableScrollView<Content>: View {
 
+    /// The actual version of StylableScrollView that is being used.
+    public let version: String = "\(Constants.MAJOR).\(Constants.MINOR).\(Constants.PATCH)"
+
     /// The style that is being used.
     @Environment(\.scrollViewStyle) private var style
 
