@@ -24,7 +24,7 @@ import SwiftUI
 @available(tvOS, unavailable)
 @available(watchOS, unavailable)
 //  swiftlint:disable:next line_length
-public struct StretchableScrollViewStyle<Header, Title, Content, TE, LE>: ScrollViewStyle where Header: View, Title: View, Content: View, TE: View, LE: View {
+public struct StretchableScrollViewStyle<Header, Title, Content, LE, TE>: ScrollViewStyle where Header: View, Title: View, Content: View, LE: View, TE: View {
 
     private let header: Header
     private let title: Title
@@ -42,8 +42,8 @@ public struct StretchableScrollViewStyle<Header, Title, Content, TE, LE>: Scroll
         title: () -> Title,
         navBarContent: () -> Content,
         _ showBackButton: Bool = true,
-        trailingElements: @escaping (NavigationBarProxy) -> TE,
-        leadingElements: @escaping (NavigationBarProxy) -> LE
+        leadingElements: @escaping (NavigationBarProxy) -> LE,
+        trailingElements: @escaping (NavigationBarProxy) -> TE
     ) {
 
         self.headerHeight = headerHeight
@@ -51,8 +51,8 @@ public struct StretchableScrollViewStyle<Header, Title, Content, TE, LE>: Scroll
         self.title = title()
         self.navBarContent = navBarContent()
         self.showBackButton = showBackButton
-        self.trailingElements = trailingElements
         self.leadingElements = leadingElements
+        self.trailingElements = trailingElements
 
     }
 

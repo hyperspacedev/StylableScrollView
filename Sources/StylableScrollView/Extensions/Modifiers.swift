@@ -85,14 +85,16 @@ public extension ScrollView {
     ///   - header: The header image that will be used for the sticky header.
     ///   - title: The title that appears on top of the header.
     ///   - navBar: The contents of the navigationBar that appears when scrolling.
+    ///   - leadingElements: The navigation bar elements that will appear on the leading side.
+    ///   - trailingElements: The navigation bar elements that will appear on the trailing side.
     ///
     @ViewBuilder @inlinable func stretchableHeader<Title, NavBar, TrailingElements, LeadingElements>(
         header: Image,
         title: () -> Title,
         navBar: () -> NavBar,
-        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements,
-        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements
-    ) -> some View where Title: View, NavBar: View, TrailingElements: View, LeadingElements: View {
+        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements,
+        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements
+    ) -> some View where Title: View, NavBar: View, LeadingElements: View, TrailingElements: View {
 
         StylableScrollView(
             .vertical,
@@ -110,11 +112,10 @@ public extension ScrollView {
                     },
                     title: title,
                     navBarContent: navBar,
-                    trailingElements: {
-                        trailingElements($0)
-                    },
                     leadingElements: {
                         leadingElements($0)
+                    }, trailingElements: {
+                        trailingElements($0)
                     }
                 )
             )
@@ -136,16 +137,16 @@ public extension ScrollView {
     ///   - header: The view that will be used for the sticky header.
     ///   - title: The title that appears on top of the header.
     ///   - navBar: The contents of the navigationBar that appears when scrolling.
-    ///   - trailingElements: The navigation bar elements that will appear on the trailing side.
     ///   - leadingElements: The navigation bar elements that will appear on the leading side.
+    ///   - trailingElements: The navigation bar elements that will appear on the trailing side.
     ///
     @ViewBuilder @inlinable func stretchableHeader<Header, Title, NavBar, TrailingElements, LeadingElements>(
         header: () -> Header,
         title: () -> Title,
         navBar: () -> NavBar,
-        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements,
-        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements
-    ) -> some View where Header: View, Title: View, NavBar: View, TrailingElements: View, LeadingElements: View {
+        leadingElements: @escaping (NavigationBarProxy) -> LeadingElements,
+        trailingElements: @escaping (NavigationBarProxy) -> TrailingElements
+    ) -> some View where Header: View, Title: View, NavBar: View, LeadingElements: View, TrailingElements: View {
 
         StylableScrollView(
             .vertical,
@@ -159,11 +160,10 @@ public extension ScrollView {
                     header: header,
                     title: title,
                     navBarContent: navBar,
-                    trailingElements: {
-                        trailingElements($0)
-                    },
                     leadingElements: {
                         leadingElements($0)
+                    }, trailingElements: {
+                        trailingElements($0)
                     }
                 )
             )

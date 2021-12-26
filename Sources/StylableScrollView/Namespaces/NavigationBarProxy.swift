@@ -36,22 +36,3 @@ public struct NavigationBarProxy {
     public var elementsColor: Color
 
 }
-
-///// A proxy for access to the size and coordinate space (for anchor resolution)
-///// of the container view.
-// @available(iOS 13.0, macOS 10.15, tvOS 13.0, watchOS 6.0, *)
-// public struct GeometryProxy {
-//
-//    /// The size of the container view.
-//    public var size: CGSize { get }
-//
-//    /// Resolves the value of `anchor` to the container view.
-//    public subscript<T>(anchor: Anchor<T>) -> T { get }
-//
-//    /// The safe area inset of the container view.
-//    public var safeAreaInsets: EdgeInsets { get }
-//
-//    /// Returns the container view's bounds rectangle, converted to a defined
-//    /// coordinate space.
-//    public func frame(in coordinateSpace: CoordinateSpace) -> CGRect
-// }
